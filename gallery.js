@@ -2,9 +2,11 @@ import images from "./gallery-items.js";
 
 const galleryListRef = document.querySelector('.gallery');
 const lightboxRef = document.querySelector('.js-lightbox');
-const modalImg = document.querySelector('.lightbox__image');;
+const galleryImg = document.querySelector('.lightbox__image');;
 const btnClose = document.querySelector('.lightbox__button');
 const lightboxOverlay = document.querySelector('.lightbox__overlay');
+
+let index = 0; // устанавливаем дата атрибут индекс для пролистывания галереи
 
 // создаем шаблонную строку
 const createGalleryHtml = ({ preview, original, description }) => {
@@ -17,6 +19,7 @@ const createGalleryHtml = ({ preview, original, description }) => {
           class="gallery__image"
           src="${preview}"
           data-source="${original}"
+          data-index="${index++}"    
           alt="${description}"
         />
       </a>
@@ -41,23 +44,28 @@ function onGalleryItemClick(event) {
   }
   
   openModal(); // при нажатии на элемент добавляем класс открытия модального окна
-  modalImg.src = originalImageUrl; // подмена значений
-  modalImg.alt = event.target.alt;
+  galleryImg.src = originalImageUrl; // подмена значений
+  galleryImg.alt = event.target.alt;
+  galleryImg.dataset.index = +event.target.dataset.index;
  
 }
 
 function openModal() {
   window.addEventListener('keydown', onPressEscape);
+  window.addEventListener('keydown', onPressRightArrow);
+  window.addEventListener('keydown', onPressLeftArrow);
   lightboxRef.classList.add('is-open');
 }
 
 btnClose.addEventListener('click', closeModal)
 
 function closeModal() {
-   window.removeEventListener('keydown', onPressEscape);
+  window.removeEventListener('keydown', onPressEscape);
+  window.removeEventListener('keydown', onPressRightArrow);
+  window.removeEventListener('keydown', onPressLeftArrow);
   lightboxRef.classList.remove('is-open');
-  modalImg.src = '';
-  modalImg.alt = '';
+  galleryImg.src = '';
+  galleryImg.alt = '';
 }
 
 lightboxOverlay.addEventListener('click', onLightboxEvent)
@@ -73,3 +81,31 @@ function onPressEscape(event) {
       closeModal();
     }
 }
+
+function onPressRightArrow(event) {
+  if (event.key === 'ArrowRight') {
+    onSwitchImg(+galleryImg.dataset.index, +1);
+  }
+}
+
+function onPressLeftArrow(event) {
+  if (event.key === 'ArrowLeft') {
+    // console.log(galleryImg.dataset.index);
+    onSwitchImg(+galleryImg.dataset.index, -1);
+  }
+}
+
+function onSwitchImg(index, step) {
+  let newIndex = index + step;
+
+  if (newIndex === images.length) {
+    newIndex = 0;
+  } else if (newIndex < 0) {
+    newIndex = images.length - 1;
+  }
+
+  galleryImg.setAttribute('src', images[newIndex].original);
+  galleryImg.setAttribute('alt', images[newIndex].description);
+  galleryImg.setAttribute('data-index', newIndex);
+}
+
