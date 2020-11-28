@@ -6,10 +6,10 @@ const galleryImg = document.querySelector('.lightbox__image');;
 const btnClose = document.querySelector('.lightbox__button');
 const lightboxOverlay = document.querySelector('.lightbox__overlay');
 
-let index = 0; // устанавливаем дата атрибут индекс для пролистывания галереи
+// let index = 0; // устанавливаем дата атрибут индекс для пролистывания галереи
 
 // создаем шаблонную строку
-const createGalleryHtml = ({ preview, original, description }) => {
+const createGalleryHtml = ({ preview, original, description }, index) => {
     return `<li class="gallery__item">
       <a
         class="gallery__link"
