@@ -1,98 +1,113 @@
-import images from "./gallery-items.js";
+import images from './gallery-items.js';
 
-const galleryListRef = document.querySelector('.gallery');
-const lightboxRef = document.querySelector('.js-lightbox');
-const galleryImg = document.querySelector('.lightbox__image');;
-const btnClose = document.querySelector('.lightbox__button');
-const lightboxOverlay = document.querySelector('.lightbox__overlay');
+const refs = {
+  galleryListRef: document.querySelector('.gallery'),
+  lightboxRef: document.querySelector('.js-lightbox'),
+  galleryImg: document.querySelector('.lightbox__image'),
+  btnClose: document.querySelector('.lightbox__button'),
+  leftArrowBtn: document.querySelector('.left-arrow'),
+  rightArrowBtn: document.querySelector('.right-arrow'),
+  lightboxOverlay: document.querySelector('.lightbox__overlay'),
+};
 
-// let index = 0; // устанавливаем дата атрибут индекс для пролистывания галереи
+const {
+  galleryListRef,
+  lightboxRef,
+  galleryImg,
+  btnClose,
+  leftArrowBtn,
+  rightArrowBtn,
+  lightboxOverlay,
+} = refs;
 
-// создаем шаблонную строку
-const createGalleryHtml = ({ preview, original, description }, index) => {
-    return `<li class="gallery__item">
-      <a
-        class="gallery__link"
-        href="${original}"
-      >
-        <img
-          class="gallery__image"
-          src="${preview}"
-          data-source="${original}"
-          data-index="${index++}"    
-          alt="${description}"
-        />
-      </a>
-    </li>`;
-  }
-// добавляем строку в ДОМ
-const createGalleryMurkup = images.map(createGalleryHtml).join('');
-// console.log(createGalleryMurkup);
+const createGalleryMarkup = images
+  .map(({ preview, original, description }, index) => {
+    return `<li class = "gallery__item">
+  <a class = "gallery__link" href = ${original}>
+  <img
+  class = "gallery__image"
+  src = ${preview}
+  data-source="${original}"
+  data-index="${(index += 1)}"
+  alt = ${description}
+  />
+  </a>
+  </li>`;
+  })
+  .join('');
 
-galleryListRef.insertAdjacentHTML('beforeend', createGalleryMurkup);
+galleryListRef.insertAdjacentHTML('beforeend', createGalleryMarkup);
 
-// вешаем слушателя на ul
-galleryListRef.addEventListener('click', onGalleryItemClick);
+galleryListRef.addEventListener('click', onImgClick);
 
-function onGalleryItemClick(event) {
-  event.preventDefault();
-  const isSwatchImageEl = event.target.classList.contains('gallery__image'); // целевой элемент
-  const originalImageUrl = event.target.dataset.source; //получаем url большого изображения
+function onImgClick(e) {
+  e.preventDefault();
+  const originalImageUrl = e.target.dataset.source;
+  // console.log(originalImageUrl);
 
-  if (!isSwatchImageEl) {
+  if (e.target.nodeName !== 'IMG') {
     return;
   }
-  
-  openModal(); // при нажатии на элемент добавляем класс открытия модального окна
-  galleryImg.src = originalImageUrl; // подмена значений
-  galleryImg.alt = event.target.alt;
-  galleryImg.dataset.index = +event.target.dataset.index;
- 
+  // console.log(e.target.nodeName);
+
+  openModal();
+  galleryImg.src = originalImageUrl;
+  galleryImg.alt = e.target.alt;
+  galleryImg.dataset.index = Number(e.target.dataset.index);
 }
 
 function openModal() {
+  lightboxRef.classList.add('is-open');
   window.addEventListener('keydown', onPressEscape);
   window.addEventListener('keydown', onPressRightArrow);
   window.addEventListener('keydown', onPressLeftArrow);
-  lightboxRef.classList.add('is-open');
 }
 
-btnClose.addEventListener('click', closeModal)
-
 function closeModal() {
+  lightboxRef.classList.remove('is-open');
   window.removeEventListener('keydown', onPressEscape);
   window.removeEventListener('keydown', onPressRightArrow);
   window.removeEventListener('keydown', onPressLeftArrow);
-  lightboxRef.classList.remove('is-open');
   galleryImg.src = '';
   galleryImg.alt = '';
 }
 
-lightboxOverlay.addEventListener('click', onLightboxEvent)
-
-function onLightboxEvent(event) {
-  if (event.target === event.currentTarget) {
+function onPressEscape(e) {
+  if (e.code === 'Escape') {
     closeModal();
   }
 }
 
-function onPressEscape(event) {
-  if (event.code === 'Escape') {
-      closeModal();
-    }
-}
+btnClose.addEventListener('click', closeModal);
+leftArrowBtn.addEventListener('click', onLeftArrowClick);
+rightArrowBtn.addEventListener('click', onRightArrowClick);
 
-function onPressRightArrow(event) {
-  if (event.key === 'ArrowRight') {
-    onSwitchImg(+galleryImg.dataset.index, +1);
+lightboxOverlay.addEventListener('click', onLightboxEvent);
+
+function onLightboxEvent(e) {
+  if (e.target === e.currentTarget) {
+    closeModal();
   }
 }
 
-function onPressLeftArrow(event) {
-  if (event.key === 'ArrowLeft') {
-    // console.log(galleryImg.dataset.index);
-    onSwitchImg(+galleryImg.dataset.index, -1);
+function onPressRightArrow(e) {
+  if (e.key === 'ArrowRight') {
+    onSwitchImg(Number(galleryImg.dataset.index), +1);
   }
+}
+
+function onPressLeftArrow(e) {
+  if (e.key === 'ArrowLeft') {
+    onSwitchImg(Number(galleryImg.dataset.index), -1);
+  }
+}
+
+function onLeftArrowClick() {
+  onSwitchImg(Number(galleryImg.dataset.index), -1);
+}
+
+function onRightArrowClick() {
+  onSwitchImg(Number(galleryImg.dataset.index), +1);
 }
 
 function onSwitchImg(index, step) {
@@ -104,8 +119,8 @@ function onSwitchImg(index, step) {
     newIndex = images.length - 1;
   }
 
+  console.log(newIndex);
   galleryImg.setAttribute('src', images[newIndex].original);
   galleryImg.setAttribute('alt', images[newIndex].description);
   galleryImg.setAttribute('data-index', newIndex);
 }
-
