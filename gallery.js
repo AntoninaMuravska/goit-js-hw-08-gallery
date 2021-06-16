@@ -51,9 +51,7 @@ function onImgClick(e) {
   // console.log(e.target.nodeName);
 
   openModal();
-  galleryImg.src = originalImageUrl;
-  galleryImg.alt = e.target.alt;
-  galleryImg.dataset.index = Number(e.target.dataset.index);
+  imgAttributes(originalImageUrl, e.target.alt, Number(e.target.dataset.index));
 }
 
 function openModal() {
@@ -110,6 +108,12 @@ function onRightArrowClick() {
   onSwitchImg(Number(galleryImg.dataset.index), +1);
 }
 
+function imgAttributes(src, alt, index) {
+  galleryImg.setAttribute('src', src);
+  galleryImg.setAttribute('alt', alt);
+  galleryImg.setAttribute('data-index', index);
+}
+
 function onSwitchImg(index, step) {
   let newIndex = index + step;
 
@@ -119,8 +123,10 @@ function onSwitchImg(index, step) {
     newIndex = images.length - 1;
   }
 
-  console.log(newIndex);
-  galleryImg.setAttribute('src', images[newIndex].original);
-  galleryImg.setAttribute('alt', images[newIndex].description);
-  galleryImg.setAttribute('data-index', newIndex);
+  // console.log(newIndex);
+  imgAttributes(
+    images[newIndex].original,
+    images[newIndex].description,
+    newIndex,
+  );
 }
